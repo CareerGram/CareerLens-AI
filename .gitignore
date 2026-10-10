@@ -1,0 +1,38 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Downloaded language models
+models/*.gguf
+models/*.bin
+models/*.safetensors
+
+# Local databases and generated data
+chroma_db/
+chroma/
+*.sqlite3
+*.db
+
+# Personal documents
+*.pdf
+*.docx
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

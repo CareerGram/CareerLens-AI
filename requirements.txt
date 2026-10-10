@@ -1,0 +1,7 @@
+streamlit
+pymupdf
+chromadb
+fastembed
+langchain-text-splitters
+llama-cpp-python
+huggingface-hub
