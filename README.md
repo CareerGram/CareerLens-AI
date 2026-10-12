@@ -180,14 +180,6 @@ CareerLens-AI/
     └── .gitkeep           # Keeps the empty model directory in Git
 ```
 
-## 🔒 Privacy and Data Handling
-
-The language model and embedding model run locally after their required files have been downloaded. The application does not require a paid LLM API.
-
-However, local inference alone does not guarantee that all processing is offline. Package installation and model downloads require internet access, and dependencies may have their own behaviour.
-
-The current application uses an in-memory ChromaDB client. Documents are indexed for the running application session, so rebuild the knowledge base after restarting the application.
-
 ## ⚠️ Limitations
 
 * The small language model may generate incomplete or incorrect answers.
