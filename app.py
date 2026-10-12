@@ -1,4 +1,3 @@
-
 import streamlit as st
 import fitz
 import chromadb
@@ -9,10 +8,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llama_cpp import Llama
 
 
-# --------------------------------------------------
-# 1. APP CONFIGURATION
-# --------------------------------------------------
-
+# CareerLens AI | Built by Team CareerGram
 st.set_page_config(
     page_title="CareerLens AI",
     page_icon="🎯",
@@ -34,10 +30,7 @@ MODEL_PATH = (
 COLLECTION_NAME = "career_documents"
 
 
-# --------------------------------------------------
-# 2. LOAD MODELS
-# --------------------------------------------------
-
+# Load the models and database
 @st.cache_resource
 def load_embedding_model():
     return TextEmbedding(
@@ -71,10 +64,7 @@ embedding_model = load_embedding_model()
 chroma_client = load_chroma_client()
 
 
-# --------------------------------------------------
-# 3. EXTRACT TEXT FROM RESUME PDF
-# --------------------------------------------------
-
+# Read the text from each resume page
 def extract_resume_pages(pdf_file):
     pages = []
 
@@ -96,10 +86,7 @@ def extract_resume_pages(pdf_file):
     return pages
 
 
-# --------------------------------------------------
-# 4. SPLIT DOCUMENTS INTO CHUNKS
-# --------------------------------------------------
-
+# Break the resume and job description into smaller pieces
 def create_document_chunks(resume_pages, job_description):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
@@ -110,7 +97,7 @@ def create_document_chunks(resume_pages, job_description):
     metadatas = []
     ids = []
 
-    # Resume chunks: retain the PDF page number
+    # Keep the page number so we can refer back to the resume
     for page_data in resume_pages:
         chunks = splitter.split_text(page_data["text"])
 
@@ -124,7 +111,7 @@ def create_document_chunks(resume_pages, job_description):
             })
             ids.append(f"resume_{index}")
 
-    # Job-description chunks: no PDF page number
+    # Split the job description and store it separately
     if job_description.strip():
         jd_chunks = splitter.split_text(
             job_description.strip()
@@ -143,10 +130,7 @@ def create_document_chunks(resume_pages, job_description):
     return documents, metadatas, ids
 
 
-# --------------------------------------------------
-# 5. CREATE THE SEARCHABLE KNOWLEDGE BASE
-# --------------------------------------------------
-
+# Save the document chunks in ChromaDB for searching
 def build_knowledge_base(resume_file, job_description):
     resume_pages = extract_resume_pages(resume_file)
 
@@ -169,12 +153,12 @@ def build_knowledge_base(resume_file, job_description):
     if not documents:
         raise ValueError("No document text was found.")
 
-    # Embed the chunks
+    # Convert each chunk into an embedding
     embeddings = list(
         embedding_model.embed(documents)
     )
 
-    # Rebuild the collection using the latest documents
+    # Start with a fresh collection for the uploaded documents
     try:
         chroma_client.delete_collection(
             COLLECTION_NAME
@@ -187,7 +171,7 @@ def build_knowledge_base(resume_file, job_description):
         metadata={"hnsw:space": "cosine"},
     )
 
-    # Add in batches to limit memory usage
+    # Add the chunks in small batches
     batch_size = 32
 
     for start in range(0, len(documents), batch_size):
@@ -203,10 +187,7 @@ def build_knowledge_base(resume_file, job_description):
     return len(documents), len(resume_pages)
 
 
-# --------------------------------------------------
-# 6. RETRIEVE RELEVANT DOCUMENT EVIDENCE
-# --------------------------------------------------
-
+# Find the document chunks most relevant to a question
 def retrieve_evidence(question, document_filter, top_k=4):
     collection = chroma_client.get_collection(
         name=COLLECTION_NAME
@@ -229,7 +210,7 @@ def retrieve_evidence(question, document_filter, top_k=4):
         ],
     }
 
-    # Apply a source filter if the user selects one document
+    # Search only the selected document, if needed
     if document_filter == "Resume only":
         query_args["where"] = {
             "source": "resume"
@@ -266,10 +247,7 @@ def retrieve_evidence(question, document_filter, top_k=4):
     return evidence
 
 
-# --------------------------------------------------
-# 7. GENERATE A GROUNDED ANSWER WITH THE SMALL LLM
-# --------------------------------------------------
-
+# Use the retrieved text to answer the question
 def generate_answer(question, evidence):
     llm = load_llm()
 
@@ -326,10 +304,7 @@ Write a clear, helpful answer with source references.
     return response["choices"][0]["message"]["content"]
 
 
-# --------------------------------------------------
-# 8. DOCUMENT UPLOAD AND INDEXING INTERFACE
-# --------------------------------------------------
-
+# Upload the documents and prepare them for searching
 st.subheader("Step 1: Add your documents")
 
 resume_file = st.file_uploader(
@@ -381,10 +356,7 @@ if st.button(
                 st.error(f"Could not build the knowledge base: {error}")
 
 
-# --------------------------------------------------
-# 9. ASK QUESTIONS ABOUT THE DOCUMENTS
-# --------------------------------------------------
-
+# Ask questions and display the answers
 st.divider()
 st.subheader("Step 2: Ask a question")
 
@@ -429,6 +401,7 @@ if st.button("Ask CareerLens AI"):
             st.subheader("Answer")
             st.write(answer)
 
+            # Show the text used to generate the answer
             with st.expander("View retrieved evidence"):
                 for number, item in enumerate(evidence, start=1):
                     st.markdown(
@@ -440,10 +413,7 @@ if st.button("Ask CareerLens AI"):
             st.error(f"Something went wrong: {error}")
 
 
-# --------------------------------------------------
-# 10. SIDEBAR
-# --------------------------------------------------
-
+# A few details about the app
 with st.sidebar:
     st.header("About CareerLens AI")
     st.write(
