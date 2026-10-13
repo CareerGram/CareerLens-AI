@@ -1,3 +1,5 @@
+* Join our Whatsaap channel to access daily up-to-date upskilling material on python, ai, ai agents and machine learning. Join to become job ready for free. 📱 **WhatsApp Channel:** [Follow us for AI updates](https://whatsapp.com/channel/0029VbARpEB7T8bYWCeDN61H)
+
 # 🎯 CareerLens AI — Evidence-Based Career Assistant
 
 **CareerLens AI** is an AI-powered career assistant that uses Retrieval-Augmented Generation (RAG) to answer questions about a candidate's resume and a job description.
